@@ -15,6 +15,52 @@ module.exports = {
   collection: "candles",
 
   actions: {
+    saveInDB_ws: {
+      rest: {
+        method: "GET",
+        path: "/save-in-db-ws",
+      },
+      params: {
+        type: "string",
+        symbol: "string",
+      },
+
+      async handler(ctx) {
+        const datafeed = new API.websocket.Datafeed();
+
+        datafeed.onClose(() => {
+          console.log("ws closed, status ", datafeed.trustConnected);
+        });
+
+        datafeed.connectSocket();
+
+        const topic = `/market/candles:${ctx.params.symbol}_${ctx.params.type}`;
+        const callbackId = datafeed.subscribe(topic, (message) => {
+          if (
+            message.topic === topic &&
+            message.subject === "trade.candles.add"
+          ) {
+            const newCandle = message.data.candles;
+            const candle = this.adapter.insert({
+              startTime: newCandle[0],
+              openPrice: newCandle[1],
+              closePrice: newCandle[2],
+              highPrice: newCandle[3],
+              lowPrice: newCandle[4],
+              volume: newCandle[5],
+              amount: newCandle[6],
+            });
+            console.log(`[i]: new candle saved in DB > `, newCandle);
+          }
+        });
+
+        return {
+          status: "success",
+          message: "candles are being stored in the database",
+        };
+      },
+    },
+
     saveInDB: {
       rest: {
         method: "GET",
@@ -28,12 +74,6 @@ module.exports = {
       },
 
       async handler(ctx) {
-        const number = await ctx.call("helper.random");
-
-        const sentence = `Welcome, ${ctx.params.type} ${ctx.params.symbol}`;
-
-        ctx.emit("saveInDB.called", { number });
-
         const targetCandles = await API.rest.Market.Histories.getMarketCandles(
           ctx.params.symbol,
           ctx.params.type,
@@ -42,7 +82,7 @@ module.exports = {
         );
 
         console.log(
-          `[i]: nummber of saved candles ${targetCandles.data.length}`
+          `[i]: nummber of saved candles > ${targetCandles.data.length}`
         );
 
         targetCandles.data.forEach(async (candle) => {
@@ -57,7 +97,11 @@ module.exports = {
           });
         });
 
-        return { number, sentence, targetCandles };
+        return {
+          status: "success",
+          message: "data stored in database",
+          data: targetCandles,
+        };
       },
     },
   },
