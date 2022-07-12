@@ -35,13 +35,15 @@ module.exports = {
         datafeed.connectSocket();
 
         const topic = `/market/candles:${ctx.params.symbol}_${ctx.params.type}`;
-        const callbackId = datafeed.subscribe(topic, (message) => {
+        const callbackId = datafeed.subscribe(topic, async (message) => {
           if (
             message.topic === topic &&
             message.subject === "trade.candles.add"
           ) {
             const newCandle = message.data.candles;
-            const candle = this.adapter.insert({
+            const candle = await this.adapter.insert({
+              symbol: `${ctx.params.symbol}`,
+              type: `${ctx.params.type}`,
               startTime: newCandle[0],
               openPrice: newCandle[1],
               closePrice: newCandle[2],
@@ -50,7 +52,11 @@ module.exports = {
               volume: newCandle[5],
               amount: newCandle[6],
             });
-            console.log(`[i]: new candle saved in DB > `, newCandle);
+            console.log(`[i]: new candle saved in DB > `, {
+              symbol: `${ctx.params.symbol}`,
+              type: `${ctx.params.type}`,
+              ...candle,
+            });
           }
         });
 
