@@ -30,6 +30,12 @@ module.exports = {
   collection: "candles",
 
   actions: {
+    list: false,
+    create: false,
+    get: false,
+    update: false,
+    remove: false,
+
     saveInDB_ws: {
       rest: {
         method: "GET",
