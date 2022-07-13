@@ -21,6 +21,7 @@
     "moleculer-db": "^0.8.18",
     "moleculer-db-adapter-mongo": "^0.4.14",
     "moleculer-web": "^0.10.2",
+    "mongodb": "4.7",
     "nats": "^2.2.0"
   },
   "engines": {
