@@ -7,6 +7,7 @@ const DbService = require("moleculer-db");
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const { Candle } = require("../classes/candle.class");
 const mongodb = require("mongodb");
+const { DB_URL, DB_NAME } = require("../config/env.config");
 
 const subscribedTopics = [];
 
@@ -23,11 +24,7 @@ module.exports = {
 
   mixins: [DbService],
 
-  adapter: new MongoDBAdapter(
-    "mongodb+srv://mtnaskari:askari@cluster0.uh0bj.mongodb.net/?retryWrites=true&w=majority",
-    { useNewUrlParser: true },
-    "Kucoin"
-  ),
+  adapter: new MongoDBAdapter(DB_URL, { useNewUrlParser: true }, DB_NAME),
 
   collection: "candles",
 
@@ -48,12 +45,6 @@ module.exports = {
   },
 
   actions: {
-    list: false,
-    create: false,
-    get: false,
-    update: false,
-    remove: false,
-
     saveInDB_ws: {
       rest: {
         method: "GET",
@@ -183,5 +174,10 @@ module.exports = {
         }
       },
     },
+    list: false,
+    create: false,
+    get: false,
+    update: false,
+    remove: false,
   },
 };

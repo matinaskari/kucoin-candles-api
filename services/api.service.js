@@ -2,13 +2,15 @@
 
 const ApiGateway = require("moleculer-web");
 
+const { PORT } = require("../config/env.config");
+
 module.exports = {
   name: "api",
   mixins: [ApiGateway],
 
   settings: {
     // Exposed port
-    port: process.env.PORT || 3500,
+    port: PORT,
 
     // Exposed IP
     ip: "0.0.0.0",
